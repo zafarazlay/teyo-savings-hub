@@ -14,16 +14,202 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      announcements: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          join_date: string
+          name: string
+          phone: string | null
+          status: Database["public"]["Enums"]["member_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          join_date?: string
+          name: string
+          phone?: string | null
+          status?: Database["public"]["Enums"]["member_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          join_date?: string
+          name?: string
+          phone?: string | null
+          status?: Database["public"]["Enums"]["member_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profit_distribution: {
+        Row: {
+          created_at: string
+          distributed_date: string
+          id: string
+          total_profit: number
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          distributed_date?: string
+          id?: string
+          total_profit: number
+          year: number
+        }
+        Update: {
+          created_at?: string
+          distributed_date?: string
+          id?: string
+          total_profit?: number
+          year?: number
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          created_at: string
+          id: string
+          late_fee: number
+          monthly_amount: number
+          updated_at: string
+          year: number
+          yearly_amount: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          late_fee?: number
+          monthly_amount?: number
+          updated_at?: string
+          year: number
+          yearly_amount?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          late_fee?: number
+          monthly_amount?: number
+          updated_at?: string
+          year?: number
+          yearly_amount?: number
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          date: string
+          id: string
+          member_id: string
+          notes: string | null
+          recorded_by: string | null
+          type: Database["public"]["Enums"]["transaction_type"]
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          date?: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          recorded_by?: string | null
+          type: Database["public"]["Enums"]["transaction_type"]
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          recorded_by?: string | null
+          type?: Database["public"]["Enums"]["transaction_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "member"
+      member_status: "active" | "inactive" | "pending"
+      transaction_type:
+        | "monthly"
+        | "yearly"
+        | "first_share"
+        | "withdrawal"
+        | "profit"
+        | "late_fee"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +336,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "member"],
+      member_status: ["active", "inactive", "pending"],
+      transaction_type: [
+        "monthly",
+        "yearly",
+        "first_share",
+        "withdrawal",
+        "profit",
+        "late_fee",
+      ],
+    },
   },
 } as const
