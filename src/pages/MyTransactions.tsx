@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Crown } from 'lucide-react';
 
 const MyTransactions = () => {
   const { profile } = useAuth();
@@ -27,8 +28,11 @@ const MyTransactions = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h1 className="page-header">My Transactions</h1>
-      <Card>
+      <div className="flex items-center gap-3">
+        <Crown className="h-6 w-6 text-amber-400" />
+        <h1 className="page-header">My Transactions</h1>
+      </div>
+      <Card className="vip-card overflow-hidden">
         <CardContent className="pt-6">
           {transactions.length === 0 ? (
             <p className="text-muted-foreground text-sm py-8 text-center">No transactions yet.</p>

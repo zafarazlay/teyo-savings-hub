@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import AppLayout from "@/components/AppLayout";
 import Login from "@/pages/Login";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -24,8 +25,11 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(ellipse at top, hsl(225 30% 12%), hsl(225 30% 5%))' }}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+          <span className="text-sm text-muted-foreground">Loading...</span>
+        </div>
       </div>
     );
   }
@@ -46,8 +50,11 @@ const AppRoutes = () => {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(ellipse at top, hsl(225 30% 12%), hsl(225 30% 5%))' }}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+          <span className="text-sm text-muted-foreground">Loading...</span>
+        </div>
       </div>
     );
   }
@@ -70,6 +77,7 @@ const AppRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -79,6 +87,7 @@ const App = () => (
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

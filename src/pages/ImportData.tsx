@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2, Users, Receipt, Download } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2, Users, Receipt, Download, Crown } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface ImportResult {
@@ -430,11 +430,14 @@ const ImportData = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h1 className="page-header">Import / Export Data</h1>
+      <div className="flex items-center gap-3">
+        <Crown className="h-6 w-6 text-amber-400" />
+        <h1 className="page-header">Import / Export Data</h1>
+      </div>
 
       {/* Export Section */}
-      <Card>
-        <CardHeader>
+      <Card className="vip-card overflow-hidden">
+        <CardHeader className="border-b border-border/30">
           <CardTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
             Export Data to Excel
@@ -444,7 +447,7 @@ const ImportData = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={handleExport} disabled={exporting} className="gap-2">
+          <Button onClick={handleExport} disabled={exporting} className="gap-2 font-semibold shadow-lg" style={{ background: 'linear-gradient(135deg, hsl(38 92% 45%), hsl(38 80% 55%))', color: 'hsl(225 30% 7%)' }}>
             {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
             {exporting ? 'Exporting...' : 'Export to Excel'}
           </Button>
@@ -453,8 +456,8 @@ const ImportData = () => {
 
       {/* Import Section */}
 
-      <Card>
-        <CardHeader>
+      <Card className="vip-card overflow-hidden">
+        <CardHeader className="border-b border-border/30">
           <CardTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5" />
             Upload Excel File

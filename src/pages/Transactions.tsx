@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Filter } from 'lucide-react';
+import { Plus, Trash2, Filter, Crown } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
 type TransactionType = Database['public']['Enums']['transaction_type'];
@@ -116,10 +116,13 @@ const Transactions = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="page-header">Transactions</h1>
+        <div className="flex items-center gap-3">
+          <Crown className="h-6 w-6 text-amber-400" />
+          <h1 className="page-header">Transactions</h1>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Record Transaction</Button>
+            <Button className="gap-2 font-semibold shadow-lg transition-all hover:shadow-xl" style={{ background: 'linear-gradient(135deg, hsl(38 92% 45%), hsl(38 80% 55%))', color: 'hsl(225 30% 7%)' }}><Plus className="h-4 w-4" />Record Transaction</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Record Transaction</DialogTitle></DialogHeader>
@@ -170,7 +173,7 @@ const Transactions = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl border border-border/30" style={{ background: 'hsl(225 25% 10% / 0.5)' }}>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Filter:</span>
@@ -230,7 +233,7 @@ const Transactions = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card>
+      <Card className="vip-card overflow-hidden">
         <CardContent className="pt-6">
           {filtered.length === 0 ? (
             <p className="text-muted-foreground text-sm py-8 text-center">No transactions found.</p>

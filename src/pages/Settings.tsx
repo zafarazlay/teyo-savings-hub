@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Save } from 'lucide-react';
+import { Save, Crown } from 'lucide-react';
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState<any[]>([]);
@@ -51,12 +51,15 @@ const SettingsPage = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h1 className="page-header">Settings</h1>
+      <div className="flex items-center gap-3">
+        <Crown className="h-6 w-6 text-amber-400" />
+        <h1 className="page-header">Settings</h1>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Savings Configuration</CardTitle>
+        <Card className="vip-card overflow-hidden">
+          <CardHeader className="border-b border-border/30">
+            <CardTitle className="text-lg font-serif">Savings Configuration</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSave} className="space-y-4">
@@ -76,17 +79,17 @@ const SettingsPage = () => {
                 <Label>Late Fee (PKR)</Label>
                 <Input type="number" min="0" value={form.late_fee} onChange={(e) => setForm({ ...form, late_fee: parseFloat(e.target.value) })} />
               </div>
-              <Button type="submit" disabled={isSubmitting}>
-                <Save className="mr-2 h-4 w-4" />
+              <Button type="submit" disabled={isSubmitting} className="gap-2 font-semibold shadow-lg" style={{ background: 'linear-gradient(135deg, hsl(38 92% 45%), hsl(38 80% 55%))', color: 'hsl(225 30% 7%)' }}>
+                <Save className="h-4 w-4" />
                 {isSubmitting ? 'Saving...' : 'Save Settings'}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Historical Settings</CardTitle>
+        <Card className="vip-card overflow-hidden">
+          <CardHeader className="border-b border-border/30">
+            <CardTitle className="text-lg font-serif">Historical Settings</CardTitle>
           </CardHeader>
           <CardContent>
             {settings.length === 0 ? (

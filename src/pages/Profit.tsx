@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Crown } from 'lucide-react';
 
 const Profit = () => {
   const [distributions, setDistributions] = useState<any[]>([]);
@@ -98,10 +98,13 @@ const Profit = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="page-header">Profit Distribution</h1>
+        <div className="flex items-center gap-3">
+          <Crown className="h-6 w-6 text-amber-400" />
+          <h1 className="page-header">Profit Distribution</h1>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button><TrendingUp className="mr-2 h-4 w-4" />Distribute Profit</Button>
+            <Button className="gap-2 font-semibold shadow-lg transition-all hover:shadow-xl" style={{ background: 'linear-gradient(135deg, hsl(38 92% 45%), hsl(38 80% 55%))', color: 'hsl(225 30% 7%)' }}><TrendingUp className="h-4 w-4" />Distribute Profit</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Distribute Bank Profit</DialogTitle></DialogHeader>
@@ -125,8 +128,8 @@ const Profit = () => {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader><CardTitle className="text-lg">Distribution History</CardTitle></CardHeader>
+      <Card className="vip-card overflow-hidden">
+        <CardHeader className="border-b border-border/30"><CardTitle className="text-lg font-serif">Distribution History</CardTitle></CardHeader>
         <CardContent>
           {distributions.length === 0 ? (
             <p className="text-muted-foreground text-sm py-8 text-center">No profit distributions recorded yet.</p>

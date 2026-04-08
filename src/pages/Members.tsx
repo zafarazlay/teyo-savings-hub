@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, UserPlus, Pencil } from 'lucide-react';
+import { Plus, Search, UserPlus, Pencil, Crown } from 'lucide-react';
 
 const Members = () => {
   const [members, setMembers] = useState<any[]>([]);
@@ -100,11 +100,14 @@ const Members = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="page-header">Members</h1>
+        <div className="flex items-center gap-3">
+          <Crown className="h-6 w-6 text-amber-400" />
+          <h1 className="page-header">Members</h1>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="mr-2 h-4 w-4" />
+            <Button className="gap-2 font-semibold shadow-lg transition-all hover:shadow-xl" style={{ background: 'linear-gradient(135deg, hsl(38 92% 45%), hsl(38 80% 55%))', color: 'hsl(225 30% 7%)' }}>
+              <UserPlus className="h-4 w-4" />
               Add Member
             </Button>
           </DialogTrigger>
@@ -184,13 +187,13 @@ const Members = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search members..."
-          className="pl-9"
+          className="pl-9 bg-background/50 border-border/50 focus:border-primary/50"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      <Card>
+      <Card className="vip-card overflow-hidden">
         <CardContent className="pt-6">
           {filtered.length === 0 ? (
             <p className="text-muted-foreground text-sm py-8 text-center">No members found.</p>

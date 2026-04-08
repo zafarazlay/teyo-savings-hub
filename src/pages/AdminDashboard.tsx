@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Wallet, TrendingUp, AlertTriangle, Users, Search } from 'lucide-react';
+import { Wallet, TrendingUp, AlertTriangle, Users, Search, Crown } from 'lucide-react';
 
 interface StatsData {
   totalFund: number;
@@ -108,25 +108,29 @@ const AdminDashboard = () => {
       title: 'Total Fund',
       value: `PKR ${stats.totalFund.toLocaleString()}`,
       icon: Wallet,
-      color: 'text-primary',
+      gradient: 'from-amber-500/20 to-yellow-500/5',
+      iconColor: 'text-amber-400',
     },
     {
       title: 'Active Members',
       value: stats.totalMembers.toString(),
       icon: Users,
-      color: 'text-secondary',
+      gradient: 'from-emerald-500/20 to-teal-500/5',
+      iconColor: 'text-emerald-400',
     },
     {
       title: 'Monthly Rate',
       value: `PKR ${stats.monthlyAmount.toLocaleString()}`,
       icon: TrendingUp,
-      color: 'text-primary',
+      gradient: 'from-blue-500/20 to-cyan-500/5',
+      iconColor: 'text-blue-400',
     },
     {
       title: 'Late Fees Collected',
       value: `PKR ${stats.totalLateFees.toLocaleString()}`,
       icon: AlertTriangle,
-      color: 'text-warning',
+      gradient: 'from-orange-500/20 to-red-500/5',
+      iconColor: 'text-orange-400',
     },
   ];
 
@@ -141,34 +145,38 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h1 className="page-header">Dashboard</h1>
+      <div className="flex items-center gap-3">
+        <Crown className="h-7 w-7 text-amber-400" />
+        <h1 className="page-header">Dashboard</h1>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
-          <Card key={card.title} className="stat-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {card.title}
-              </CardTitle>
-              <card.icon className={`h-5 w-5 ${card.color}`} />
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-semibold">{card.value}</p>
-            </CardContent>
-          </Card>
+          <div key={card.title} className="stat-card relative overflow-hidden group">
+            <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-50 group-hover:opacity-80 transition-opacity`} />
+            <div className="relative">
+              <div className="flex items-center justify-between pb-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {card.title}
+                </p>
+                <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+              </div>
+              <p className="text-2xl font-bold">{card.value}</p>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Member Individual Savings */}
-      <Card>
-        <CardHeader>
+      <Card className="vip-card overflow-hidden">
+        <CardHeader className="border-b border-border/30">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Member Savings</CardTitle>
+            <CardTitle className="text-lg font-serif">Member Savings</CardTitle>
             <div className="relative w-48">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search member..."
-                className="pl-9 h-8 text-sm"
+                className="pl-9 h-8 text-sm bg-background/50 border-border/50"
                 value={memberSearch}
                 onChange={(e) => setMemberSearch(e.target.value)}
               />
@@ -206,9 +214,9 @@ const AdminDashboard = () => {
       </Card>
 
       {/* Recent Transactions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recent Transactions</CardTitle>
+      <Card className="vip-card overflow-hidden">
+        <CardHeader className="border-b border-border/30">
+          <CardTitle className="text-lg font-serif">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
           {recentTransactions.length === 0 ? (

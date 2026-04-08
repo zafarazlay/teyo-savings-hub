@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, TrendingUp, AlertTriangle, Calendar } from 'lucide-react';
+import { Wallet, TrendingUp, AlertTriangle, Calendar, Crown } from 'lucide-react';
 
 const MemberDashboard = () => {
   const { profile } = useAuth();
@@ -52,33 +52,37 @@ const MemberDashboard = () => {
   };
 
   const statCards = [
-    { title: 'My Balance', value: `PKR ${balance.toLocaleString()}`, icon: Wallet, color: 'text-primary' },
-    { title: 'Profit Earned', value: `PKR ${profitShare.toLocaleString()}`, icon: TrendingUp, color: 'text-primary' },
-    { title: 'Late Fees', value: `PKR ${lateFees.toLocaleString()}`, icon: AlertTriangle, color: 'text-warning' },
-    { title: 'Total Deposits', value: transactions.filter(t => !['withdrawal', 'late_fee'].includes(t.type)).length.toString(), icon: Calendar, color: 'text-secondary' },
+    { title: 'My Balance', value: `PKR ${balance.toLocaleString()}`, icon: Wallet, gradient: 'from-amber-500/20 to-yellow-500/5', iconColor: 'text-amber-400' },
+    { title: 'Profit Earned', value: `PKR ${profitShare.toLocaleString()}`, icon: TrendingUp, gradient: 'from-emerald-500/20 to-teal-500/5', iconColor: 'text-emerald-400' },
+    { title: 'Late Fees', value: `PKR ${lateFees.toLocaleString()}`, icon: AlertTriangle, gradient: 'from-orange-500/20 to-red-500/5', iconColor: 'text-orange-400' },
+    { title: 'Total Deposits', value: transactions.filter(t => !['withdrawal', 'late_fee'].includes(t.type)).length.toString(), icon: Calendar, gradient: 'from-blue-500/20 to-cyan-500/5', iconColor: 'text-blue-400' },
   ];
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h1 className="page-header">Welcome, {profile?.name ?? 'Member'}</h1>
+      <div className="flex items-center gap-3">
+        <Crown className="h-6 w-6 text-amber-400" />
+        <h1 className="page-header">Welcome, {profile?.name ?? 'Member'}</h1>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
-          <Card key={card.title} className="stat-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
-              <card.icon className={`h-5 w-5 ${card.color}`} />
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-semibold">{card.value}</p>
-            </CardContent>
-          </Card>
+          <div key={card.title} className="stat-card relative overflow-hidden group">
+            <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-50 group-hover:opacity-80 transition-opacity`} />
+            <div className="relative">
+              <div className="flex items-center justify-between pb-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{card.title}</p>
+                <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+              </div>
+              <p className="text-2xl font-bold">{card.value}</p>
+            </div>
+          </div>
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Recent Transactions</CardTitle>
+      <Card className="vip-card overflow-hidden">
+        <CardHeader className="border-b border-border/30">
+          <CardTitle className="text-lg font-serif">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
           {transactions.length === 0 ? (

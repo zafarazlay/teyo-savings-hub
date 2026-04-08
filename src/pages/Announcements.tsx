@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Megaphone, Trash2 } from 'lucide-react';
+import { Plus, Megaphone, Trash2, Crown } from 'lucide-react';
 
 const Announcements = () => {
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -64,11 +64,14 @@ const Announcements = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="page-header">Announcements</h1>
+        <div className="flex items-center gap-3">
+          <Crown className="h-6 w-6 text-amber-400" />
+          <h1 className="page-header">Announcements</h1>
+        </div>
         {role === 'admin' && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />New Announcement</Button>
+              <Button className="gap-2 font-semibold shadow-lg transition-all hover:shadow-xl" style={{ background: 'linear-gradient(135deg, hsl(38 92% 45%), hsl(38 80% 55%))', color: 'hsl(225 30% 7%)' }}><Plus className="h-4 w-4" />New Announcement</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Post Announcement</DialogTitle></DialogHeader>
@@ -107,16 +110,16 @@ const Announcements = () => {
       </AlertDialog>
 
       {announcements.length === 0 ? (
-        <Card>
+        <Card className="vip-card">
           <CardContent className="py-12 text-center">
-            <Megaphone className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
+            <Megaphone className="mx-auto h-10 w-10 text-amber-400/50 mb-3" />
             <p className="text-muted-foreground text-sm">No announcements yet.</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {announcements.map((a) => (
-            <Card key={a.id}>
+            <Card key={a.id} className="vip-card overflow-hidden group hover:border-amber-500/20 transition-all duration-300">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
