@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, TrendingUp, AlertTriangle, Users } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Wallet, TrendingUp, AlertTriangle, Users, Search } from 'lucide-react';
 
 interface StatsData {
   totalFund: number;
@@ -11,9 +12,16 @@ interface StatsData {
   totalLateFees: number;
 }
 
+interface MemberSavings {
+  name: string;
+  total: number;
+}
+
 const AdminDashboard = () => {
   const [stats, setStats] = useState<StatsData>({ totalFund: 0, totalMembers: 0, monthlyAmount: 0, totalLateFees: 0 });
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [memberSavings, setMemberSavings] = useState<MemberSavings[]>([]);
+  const [memberSearch, setMemberSearch] = useState('');
   const { role } = useAuth();
 
   useEffect(() => {
@@ -65,6 +73,29 @@ const AdminDashboard = () => {
         .limit(10);
 
       setRecentTransactions(recent ?? []);
+
+      // Calculate individual member savings
+      const { data: allTxns } = await supabase
+        .from('transactions')
+        .select('member_id, type, amount, profiles(name)');
+
+      const savingsMap = new Map<string, { name: string; total: number }>();
+      (allTxns ?? []).forEach((t) => {
+        const memberId = t.member_id;
+        const name = (t.profiles as any)?.name ?? 'Unknown';
+        if (!savingsMap.has(memberId)) {
+          savingsMap.set(memberId, { name, total: 0 });
+        }
+        const entry = savingsMap.get(memberId)!;
+        if (t.type === 'withdrawal') {
+          entry.total -= Number(t.amount);
+        } else {
+          entry.total += Number(t.amount);
+        }
+      });
+
+      const savingsArr = Array.from(savingsMap.values()).sort((a, b) => b.total - a.total);
+      setMemberSavings(savingsArr);
     };
 
     if (role === 'admin') {
@@ -127,6 +158,52 @@ const AdminDashboard = () => {
           </Card>
         ))}
       </div>
+
+      {/* Member Individual Savings */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Member Savings</CardTitle>
+            <div className="relative w-48">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search member..."
+                className="pl-9 h-8 text-sm"
+                value={memberSearch}
+                onChange={(e) => setMemberSearch(e.target.value)}
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {memberSavings.length === 0 ? (
+            <p className="text-muted-foreground text-sm py-4 text-center">No data yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-3 font-medium">#</th>
+                    <th className="pb-3 font-medium">Member</th>
+                    <th className="pb-3 font-medium text-right">Total Savings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {memberSavings
+                    .filter((m) => m.name.toLowerCase().includes(memberSearch.toLowerCase()))
+                    .map((m, i) => (
+                    <tr key={i} className="data-table-row">
+                      <td className="py-3 text-muted-foreground">{i + 1}</td>
+                      <td className="py-3 font-medium">{m.name}</td>
+                      <td className="py-3 text-right currency">PKR {m.total.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Recent Transactions */}
       <Card>
