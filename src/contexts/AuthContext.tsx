@@ -51,25 +51,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let mounted = true;
+    let initialSessionHandled = false;
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // Listen for auth changes (login, logout, token refresh)
+    // Listen for auth changes FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
         
-        // Only handle meaningful events
+        console.log('Auth event:', event, session?.user?.id);
+
+        if (event === 'INITIAL_SESSION') {
+          // This fires once on page load - use it as our source of truth
+          initialSessionHandled = true;
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            fetchUserData(session.user.id);
+          } else {
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (event === 'SIGNED_IN') {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            fetchUserData(session.user.id);
+          }
+          return;
+        }
+
+        if (event === 'TOKEN_REFRESHED') {
+          // Just update the session, don't re-fetch user data
+          setSession(session);
+          return;
+        }
+
         if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
@@ -79,21 +97,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setLoading(false);
           return;
         }
-
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          if (session?.user && session.user.id !== lastUserIdRef.current) {
-            // Only re-fetch if it's a different user
-            fetchUserData(session.user.id);
-          }
-        }
       }
     );
 
+    // Fallback: if INITIAL_SESSION doesn't fire within 2 seconds
+    const timeout = setTimeout(() => {
+      if (!initialSessionHandled && mounted) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (!mounted) return;
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            fetchUserData(session.user.id);
+          } else {
+            setLoading(false);
+          }
+        });
+      }
+    }, 2000);
+
     return () => {
       mounted = false;
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, [fetchUserData]);
