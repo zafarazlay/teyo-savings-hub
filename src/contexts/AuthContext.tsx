@@ -176,6 +176,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, name: string) => {
+    // Only allow sign up if admin has already added this email in profiles
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (!existingProfile) {
+      return { error: { message: 'This email is not registered by admin. Please contact your admin to add your email first.' } };
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
