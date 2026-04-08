@@ -22,7 +22,7 @@ const Members = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editMember, setEditMember] = useState<any>(null);
-  const [newMember, setNewMember] = useState({ name: '', phone: '', address: '' });
+  const [newMember, setNewMember] = useState({ name: '', email: '', phone: '', address: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -45,6 +45,7 @@ const Members = () => {
 
     const { error } = await supabase.from('profiles').insert({
       name: newMember.name,
+      email: newMember.email || null,
       phone: newMember.phone || null,
       address: newMember.address || null,
       status: 'active',
@@ -54,7 +55,7 @@ const Members = () => {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Member added', description: `${newMember.name} has been added.` });
-      setNewMember({ name: '', phone: '', address: '' });
+      setNewMember({ name: '', email: '', phone: '', address: '' });
       setDialogOpen(false);
       fetchMembers();
     }
@@ -68,6 +69,7 @@ const Members = () => {
 
     const { error } = await supabase.from('profiles').update({
       name: editMember.name,
+      email: editMember.email || null,
       phone: editMember.phone || null,
       address: editMember.address || null,
       status: editMember.status,
@@ -91,6 +93,7 @@ const Members = () => {
 
   const filtered = members.filter((m) =>
     m.name.toLowerCase().includes(search.toLowerCase()) ||
+    (m.email && m.email.toLowerCase().includes(search.toLowerCase())) ||
     (m.phone && m.phone.includes(search))
   );
 
@@ -113,6 +116,10 @@ const Members = () => {
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input id="name" value={newMember.name} onChange={(e) => setNewMember({ ...newMember, name: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="member@example.com" value={newMember.email} onChange={(e) => setNewMember({ ...newMember, email: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
@@ -141,6 +148,10 @@ const Members = () => {
               <div className="space-y-2">
                 <Label>Full Name *</Label>
                 <Input value={editMember.name} onChange={(e) => setEditMember({ ...editMember, name: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input type="email" placeholder="member@example.com" value={editMember.email || ''} onChange={(e) => setEditMember({ ...editMember, email: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label>Phone</Label>
@@ -189,6 +200,7 @@ const Members = () => {
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
                     <th className="pb-3 font-medium">Name</th>
+                    <th className="pb-3 font-medium">Email</th>
                     <th className="pb-3 font-medium">Phone</th>
                     <th className="pb-3 font-medium">Join Date</th>
                     <th className="pb-3 font-medium">Status</th>
@@ -199,6 +211,7 @@ const Members = () => {
                   {filtered.map((m) => (
                     <tr key={m.id} className="data-table-row">
                       <td className="py-3 font-medium">{m.name}</td>
+                      <td className="py-3 text-muted-foreground">{m.email || '—'}</td>
                       <td className="py-3 text-muted-foreground">{m.phone || '—'}</td>
                       <td className="py-3 text-muted-foreground">{m.join_date}</td>
                       <td className="py-3">
