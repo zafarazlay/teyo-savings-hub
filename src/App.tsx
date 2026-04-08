@@ -71,7 +71,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/teyo-savings-hub">
         <AuthProvider>
           <AppRoutes />
         </AuthProvider>
