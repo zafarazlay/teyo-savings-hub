@@ -163,36 +163,12 @@ const ImportData = () => {
         continue;
       }
 
-      const memberId = (row.MemberID || row.memberid || row['Member ID'] || (i + 1)).toString();
       const phone = (row.Phone || row.phone || '').toString().trim();
       const joinDate = parseExcelDate(row.JoinDate || row.joindate || row['Join Date']);
       const status = normalizeStatus(row.Status || row.status);
 
-      // Create placeholder email from member name
-      const emailName = name.toLowerCase().replace(/[^a-z0-9]/g, '.').replace(/\.+/g, '.').replace(/^\.+|\.+$/g, '');
-      const email = `${emailName}.m${memberId}@teyo.member`;
-      const tempPassword = `TeyoMember_${memberId}_${Date.now()}`;
-
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password: tempPassword,
-        options: { data: { name } },
-      });
-
-      if (authError) {
-        errors.push(`Row ${rowNum} "${name}": ${authError.message}`);
-        failed++;
-        continue;
-      }
-
-      if (!authData.user) {
-        errors.push(`Row ${rowNum} "${name}": User creation failed`);
-        failed++;
-        continue;
-      }
-
+      // Insert profile directly without creating auth user
       const { data: profileData, error: profileError } = await supabase.from('profiles').insert({
-        user_id: authData.user.id,
         name,
         phone: phone || null,
         join_date: joinDate,
@@ -204,12 +180,6 @@ const ImportData = () => {
         failed++;
         continue;
       }
-
-      // Assign member role
-      await supabase.from('user_roles').insert({
-        user_id: authData.user.id,
-        role: 'member',
-      });
 
       memberMap.set(name.toLowerCase().trim(), profileData.id);
       success++;
