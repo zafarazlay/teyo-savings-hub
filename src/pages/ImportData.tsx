@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2, Users, Receipt } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2, Users, Receipt, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface ImportResult {
@@ -28,6 +28,78 @@ const ImportData = () => {
   const workbookRef = useRef<XLSX.WorkBook | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      // Fetch all profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('name');
+
+      // Fetch all transactions with member names
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select('*, profiles(name)')
+        .order('date', { ascending: true });
+
+      // Build "members details" sheet
+      const membersData = (profiles ?? []).map((m, i) => ({
+        'MemberID': i + 1,
+        'Member Name': m.name,
+        'Email': m.email || '',
+        'Phone': m.phone || '',
+        'Address': m.address || '',
+        'JoinDate': m.join_date || '',
+        'Status': m.status || 'active',
+      }));
+
+      // Build "Ledger" sheet
+      const typeLabels: Record<string, string> = {
+        monthly: 'Monthly',
+        yearly: 'Yearly',
+        first_share: 'First time',
+        withdrawal: 'Withdrawal',
+        profit: 'Profit',
+        late_fee: 'Late fee',
+      };
+
+      const ledgerData = (transactions ?? []).map((t: any) => ({
+        'Date': t.date,
+        'Type': typeLabels[t.type] || t.type,
+        'Member Name': t.profiles?.name || '',
+        'Amount': t.amount,
+        'Notes': t.notes || '',
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const membersSheet = XLSX.utils.json_to_sheet(membersData);
+      const ledgerSheet = XLSX.utils.json_to_sheet(ledgerData);
+
+      // Set column widths
+      membersSheet['!cols'] = [
+        { wch: 10 }, { wch: 25 }, { wch: 30 }, { wch: 15 }, { wch: 35 }, { wch: 12 }, { wch: 10 },
+      ];
+      ledgerSheet['!cols'] = [
+        { wch: 12 }, { wch: 15 }, { wch: 25 }, { wch: 12 }, { wch: 30 },
+      ];
+
+      XLSX.utils.book_append_sheet(wb, membersSheet, 'members details');
+      XLSX.utils.book_append_sheet(wb, ledgerSheet, 'Ledger');
+
+      const today = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, `TEYO_Data_${today}.xlsx`);
+
+      toast({ title: 'Export complete!', description: 'Excel file downloaded successfully.' });
+    } catch (err: any) {
+      toast({ title: 'Export error', description: err.message, variant: 'destructive' });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const parseExcelDate = (val: any): string => {
     if (!val) return new Date().toISOString().split('T')[0];
@@ -358,7 +430,28 @@ const ImportData = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h1 className="page-header">Import Data from Excel</h1>
+      <h1 className="page-header">Import / Export Data</h1>
+
+      {/* Export Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5" />
+            Export Data to Excel
+          </CardTitle>
+          <CardDescription>
+            Saara data (Members + Transactions) Excel file mein download karein — same format jaise import mein use hota hai.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={handleExport} disabled={exporting} className="gap-2">
+            {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {exporting ? 'Exporting...' : 'Export to Excel'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Import Section */}
 
       <Card>
         <CardHeader>
