@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Landmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+const logoUrl = `${import.meta.env.BASE_URL}logo.png`;
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -51,8 +52,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md animate-fade-in">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
-            <Landmark className="h-7 w-7 text-primary-foreground" />
+          <div className="mx-auto">
+            <img src={logoUrl} alt="TE&YO Logo" className="h-24 w-24 rounded-xl object-contain" />
           </div>
           <div>
             <CardTitle className="text-2xl font-semibold">TE&YO Savings</CardTitle>

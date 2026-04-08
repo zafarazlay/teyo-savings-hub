@@ -6,10 +6,11 @@ import {
   TrendingUp,
   Megaphone,
   LogOut,
-  Landmark,
   UserCircle,
   FileSpreadsheet,
 } from 'lucide-react';
+
+const logoUrl = `${import.meta.env.BASE_URL}logo.png`;
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -51,7 +52,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border">
-        <Landmark className="h-6 w-6 text-sidebar-primary shrink-0" />
+        <img src={logoUrl} alt="TE&YO" className="h-8 w-8 rounded object-contain shrink-0" />
         {!collapsed && (
           <span className="font-semibold text-sidebar-foreground text-sm">TE&YO Savings</span>
         )}
