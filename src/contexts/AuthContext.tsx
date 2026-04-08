@@ -180,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
-      .eq('email', email)
+      .ilike('email', email)
       .maybeSingle();
 
     if (!existingProfile) {
