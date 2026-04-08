@@ -15,6 +15,7 @@ import SettingsPage from "@/pages/Settings";
 import Announcements from "@/pages/Announcements";
 import MyTransactions from "@/pages/MyTransactions";
 import NotFound from "@/pages/NotFound";
+import ImportData from "@/pages/ImportData";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const AppRoutes = () => {
       <Route path="/profit" element={<ProtectedRoute adminOnly><Profit /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute adminOnly><SettingsPage /></ProtectedRoute>} />
       <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
+      <Route path="/import" element={<ProtectedRoute adminOnly><ImportData /></ProtectedRoute>} />
       <Route path="/my-transactions" element={<ProtectedRoute><MyTransactions /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

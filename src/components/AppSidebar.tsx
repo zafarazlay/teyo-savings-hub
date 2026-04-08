@@ -8,6 +8,7 @@ import {
   LogOut,
   Landmark,
   UserCircle,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +32,7 @@ const adminItems = [
   { title: 'Transactions', url: '/transactions', icon: Receipt },
   { title: 'Profit', url: '/profit', icon: TrendingUp },
   { title: 'Announcements', url: '/announcements', icon: Megaphone },
+  { title: 'Import Data', url: '/import', icon: FileSpreadsheet },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
