@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchingRef = useRef(false);
   const lastUserIdRef = useRef<string | null>(null);
 
-  const fetchUserData = useCallback(async (userId: string) => {
+  const fetchUserData = useCallback(async (userId: string, userEmail?: string) => {
     // Prevent duplicate fetches for the same user
     if (fetchingRef.current && lastUserIdRef.current === userId) return;
     fetchingRef.current = true;
@@ -38,8 +38,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle(),
       ]);
 
+      let profileData = profileResult.data;
+
+      // If no profile found by user_id, try to find by email and link it
+      if (!profileData && userEmail) {
+        const { data: emailProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', userEmail)
+          .is('user_id', null)
+          .maybeSingle();
+
+        if (emailProfile) {
+          // Link the imported profile to this auth user
+          const { data: updated } = await supabase
+            .from('profiles')
+            .update({ user_id: userId })
+            .eq('id', emailProfile.id)
+            .select('*')
+            .single();
+          profileData = updated || emailProfile;
+        }
+      }
+
+      // If still no profile found, try matching by name from auth metadata
+      if (!profileData) {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const userName = authUser?.user_metadata?.name;
+        if (userName) {
+          const { data: nameProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .ilike('name', userName)
+            .is('user_id', null)
+            .maybeSingle();
+
+          if (nameProfile) {
+            const { data: updated } = await supabase
+              .from('profiles')
+              .update({ user_id: userId, email: userEmail || null })
+              .eq('id', nameProfile.id)
+              .select('*')
+              .single();
+            profileData = updated || nameProfile;
+          }
+        }
+      }
+
       setRole(roleResult.data?.role as UserRole ?? 'member');
-      setProfile(profileResult.data);
+      setProfile(profileData);
     } catch (error) {
       console.error('Error fetching user data:', error);
       setRole('member');
@@ -66,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(session);
           setUser(session?.user ?? null);
           if (session?.user) {
-            fetchUserData(session.user.id);
+            fetchUserData(session.user.id, session.user.email);
           } else {
             setLoading(false);
           }
@@ -77,7 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(session);
           setUser(session?.user ?? null);
           if (session?.user) {
-            fetchUserData(session.user.id);
+            fetchUserData(session.user.id, session.user.email);
           }
           return;
         }
@@ -108,7 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(session);
           setUser(session?.user ?? null);
           if (session?.user) {
-            fetchUserData(session.user.id);
+            fetchUserData(session.user.id, session.user.email);
           } else {
             setLoading(false);
           }
