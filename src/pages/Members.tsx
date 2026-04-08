@@ -12,14 +12,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, UserPlus } from 'lucide-react';
+import { Plus, Search, UserPlus, Pencil } from 'lucide-react';
 
 const Members = () => {
   const [members, setMembers] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [newMember, setNewMember] = useState({ name: '', email: '', phone: '', address: '' });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editMember, setEditMember] = useState<any>(null);
+  const [newMember, setNewMember] = useState({ name: '', phone: '', address: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -37,53 +40,53 @@ const Members = () => {
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMember.name.trim() || !newMember.email.trim()) return;
+    if (!newMember.name.trim()) return;
     setIsSubmitting(true);
 
-    // Create auth user first, then profile via admin
-    // For simplicity, we create the user with a temp password
-    const tempPassword = `TempPass_${Date.now()}`;
-    
-    // We'll use supabase auth admin via edge function in production
-    // For now, sign up the user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: newMember.email,
-      password: tempPassword,
-      options: { data: { name: newMember.name } },
+    const { error } = await supabase.from('profiles').insert({
+      name: newMember.name,
+      phone: newMember.phone || null,
+      address: newMember.address || null,
+      status: 'active',
     });
 
-    if (authError) {
-      toast({ title: 'Error', description: authError.message, variant: 'destructive' });
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (authData.user) {
-      // Insert profile
-      const { error: profileError } = await supabase.from('profiles').insert({
-        user_id: authData.user.id,
-        name: newMember.name,
-        phone: newMember.phone || null,
-        address: newMember.address || null,
-        status: 'active',
-      });
-
-      if (profileError) {
-        toast({ title: 'Error creating profile', description: profileError.message, variant: 'destructive' });
-      } else {
-        // Add member role
-        await supabase.from('user_roles').insert({
-          user_id: authData.user.id,
-          role: 'member',
-        });
-
-        toast({ title: 'Member added', description: `${newMember.name} has been added. Temp password: ${tempPassword}` });
-        setNewMember({ name: '', email: '', phone: '', address: '' });
-        setDialogOpen(false);
-        fetchMembers();
-      }
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Member added', description: `${newMember.name} has been added.` });
+      setNewMember({ name: '', phone: '', address: '' });
+      setDialogOpen(false);
+      fetchMembers();
     }
     setIsSubmitting(false);
+  };
+
+  const handleEditMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editMember) return;
+    setIsSubmitting(true);
+
+    const { error } = await supabase.from('profiles').update({
+      name: editMember.name,
+      phone: editMember.phone || null,
+      address: editMember.address || null,
+      status: editMember.status,
+    }).eq('id', editMember.id);
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Member updated', description: `${editMember.name} has been updated.` });
+      setEditDialogOpen(false);
+      setEditMember(null);
+      fetchMembers();
+    }
+    setIsSubmitting(false);
+  };
+
+  const openEditDialog = (member: any) => {
+    setEditMember({ ...member });
+    setEditDialogOpen(true);
   };
 
   const filtered = members.filter((m) =>
@@ -112,10 +115,6 @@ const Members = () => {
                 <Input id="name" value={newMember.name} onChange={(e) => setNewMember({ ...newMember, name: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input id="email" type="email" value={newMember.email} onChange={(e) => setNewMember({ ...newMember, email: e.target.value })} required />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
                 <Input id="phone" value={newMember.phone} onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })} />
               </div>
@@ -130,6 +129,45 @@ const Members = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Edit Member Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Member</DialogTitle>
+          </DialogHeader>
+          {editMember && (
+            <form onSubmit={handleEditMember} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Full Name *</Label>
+                <Input value={editMember.name} onChange={(e) => setEditMember({ ...editMember, name: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input value={editMember.phone || ''} onChange={(e) => setEditMember({ ...editMember, phone: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Address</Label>
+                <Input value={editMember.address || ''} onChange={(e) => setEditMember({ ...editMember, address: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={editMember.status} onValueChange={(v) => setEditMember({ ...editMember, status: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -154,6 +192,7 @@ const Members = () => {
                     <th className="pb-3 font-medium">Phone</th>
                     <th className="pb-3 font-medium">Join Date</th>
                     <th className="pb-3 font-medium">Status</th>
+                    <th className="pb-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -170,6 +209,11 @@ const Members = () => {
                         }`}>
                           {m.status}
                         </span>
+                      </td>
+                      <td className="py-3 text-right">
+                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(m)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                       </td>
                     </tr>
                   ))}
